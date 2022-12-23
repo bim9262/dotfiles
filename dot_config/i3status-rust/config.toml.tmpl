@@ -76,6 +76,12 @@ format = " $icon %a %Y-%m-%d %R %Z "
 block = "notify"
 format = " $icon {($notification_count.eng(1))|} "
 driver = "swaync"
+[[block.click]]
+button = "left"
+action = "show"
+[[block.click]]
+button = "right"
+action = "toggle"
 
 [[block]]
 block = "hueshift"
