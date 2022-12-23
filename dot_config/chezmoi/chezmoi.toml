@@ -1,0 +1,4 @@
+encryption = "gpg"
+[gpg]
+    recipient = "bim9262@gmail.com"
+
