@@ -1,0 +1,13 @@
+#!/bin/bash
+
+#convert m4a to mp3
+
+FILES="./*.m4a ./**/*.m4a"
+
+shopt -s globstar
+
+for F in $FILES; do
+	newname=`basename "$F" .m4a`
+	echo $newname
+	ffmpeg -y -v 0 -stats -i "$F" -acodec libmp3lame -ac 2 -ab 128k -ar 44100 "$newname.mp3" && rm "$F"
+done

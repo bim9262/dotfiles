@@ -1,0 +1,44 @@
+[core]
+	pager = delta
+
+[interactive]
+	diffFilter = delta --color-only
+
+[delta]
+	features = line-numbers decorations
+	whitespace-error-style = 22 reverse
+	navigate = true  # use n and N to move between diff sections
+
+[delta "decorations"]
+	commit-decoration-style = bold yellow box ul
+	file-style = bold yellow ul
+	file-decoration-style = none
+
+[user]
+	email = bim9262@gmail.com
+	name = Bryan Malyn
+
+[merge]
+	ff = only
+
+[push]
+	default = simple
+
+[diff]
+	tool = vimdiff
+
+[difftool]
+	prompt = false
+
+[commit]
+	gpgsign = true
+
+[log]
+	showSignature = true
+
+[init]
+	defaultBranch = master
+[remote]
+	pushdefault = origin
+[checkout]
+	defaultRemote = upstream

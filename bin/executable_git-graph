@@ -1,0 +1,3 @@
+#!/bin/bash
+
+GIT_CONFIG_GLOBAL=/dev/null git log --graph --abbrev-commit --decorate --oneline $@

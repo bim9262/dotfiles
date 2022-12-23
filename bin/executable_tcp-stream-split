@@ -1,0 +1,8 @@
+#!/bin/bash
+
+pcap="$1"
+cd `dirname $pcap`
+mkdir -p "$pcap.parts/"
+for tcp_stream in $(tshark -n -r "$pcap" -T fields -e tcp.stream | sort -un | tail -1); do
+    tshark -Y "tcp.stream eq ${tcp_stream}" -r "$pcap" -T fields -e data.text | tee $pcap.parts/$tcp_stream.pcap
+done

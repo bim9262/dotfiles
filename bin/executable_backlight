@@ -1,0 +1,7 @@
+#!/bin/bash
+
+for bus in $(ddcutil detect | awk -F'-' '/I2C bus/ {print $NF}'); do
+    ddcutil --sleep-multiplier .5 --bus $(basename $bus) setvcp 10 $@ &
+done
+
+wait

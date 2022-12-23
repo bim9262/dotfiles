@@ -1,0 +1,15 @@
+#!/bin/bash
+
+set -e
+
+base=$(git remote get-url --all origin | awk -F: '{print $1}')
+
+if [[ $base != "git@github.com" ]]; then
+    echo "This script has nothing to do"
+    exit 1
+fi
+
+repo=$(git remote get-url --all origin | awk -F: '{print $2}')
+
+git remote set-url origin https://github.com/$repo
+git remote set-url --push origin git@github.com:$1/$repo

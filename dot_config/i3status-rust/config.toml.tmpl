@@ -1,0 +1,127 @@
+[theme]
+theme = "solarized-dark"
+
+[theme.overrides]
+separator = "<span size='12pt'></span>"
+
+[icons]
+icons = "awesome5"
+
+[[block]]
+block = "music"
+player = "spotify"
+format = " $icon $combo $play $next| "
+#[[block.click]]
+#button = "left"
+#cmd = "spotify"
+
+{{ if eq .chezmoi.hostname "bmalyn-yoga" }}
+[[block]]
+block = "net"
+device = "wlp2s0"
+format = " $icon {$signal_strength} "
+[[block.click]]
+button = "left"
+cmd = "alacritty -e nmtui"
+{{ end }}
+
+[[block]]
+block = "temperature"
+interval = 1
+format = " $icon Temp: {$average}C "
+
+[[block]]
+block = "load"
+interval = 1
+format = " $icon Load: $1m "
+
+[[block]]
+block = "cpu"
+interval = 1
+format = " $icon Usage: $utilization "
+
+[[block]]
+block = "battery"
+interval = 1
+{{ if eq .chezmoi.hostname "bmalyn-tower" }}
+driver = "apc_ups"
+format = " $icon $percentage $time $power|N/A "
+full_format = " $icon $percentage $time $power|N/A "
+{{ else if eq .chezmoi.hostname "bmalyn-yoga" }}
+device = "BAT1"
+format = " $icon {$percentage} {$time} "
+full_format = " $icon Full "
+{{ end }}
+
+[[block]]
+block = "pacman"
+format = " $icon $pacman + $aur = both updates available "
+format_singular = " $icon $pacman + $aur = both updates available "
+format_up_to_date = " $icon system up to date "
+critical_updates_regex = "(linux|linux-lts|linux-zen)"
+aur_command = "paru -Qua"
+
+[[block]]
+block = "weather"
+format = " $icon $weather_verbose {$temp}C "
+autolocate = true
+[block.service]
+name = "metno"
+
+[[block]]
+block = "time"
+format = " $icon %a %Y-%m-%d %R %Z "
+
+[[block]]
+block = "notify"
+format = " $icon {($notification_count.eng(1))|} "
+driver = "swaync"
+
+[[block]]
+block = "hueshift"
+step = 50
+click_temp = 4500
+
+[[block]]
+block = "sound"
+{{ if eq .chezmoi.hostname "bmalyn-tower" }}
+step_width = 0
+format = " $icon $output_name "
+[[block.click]]
+button = "left"
+cmd = "nextSink.awk"
+[block.theme_overrides]
+# warning_bg = { link = "idle_bg" }
+# warning_fg = { link = "idle_fg" }
+warning_bg = "#002b36" # base03
+warning_fg = "#93a1a1" # base1
+[block.mappings]
+"alsa_output.pci-0000_41_00.1.hdmi-stereo-extra2" = "\uf390"
+"alsa_output.usb-Focusrite_Scarlett_Solo_USB_Y7RRZHQ19D3BE3-00.iec958-stereo" = "\uf025"
+{{ else if eq .chezmoi.hostname "bmalyn-yoga" }}
+device_kind = "sink"
+name = "alsa_output.pci-0000_00_1f.3.pro-output-0"
+
+# [[block]]
+# block = "custom"
+# # Print the headphone symbol if Slim is plugged in
+# command = "test -e /proc/asound/Slim && echo -e '\\uf025'"
+# interval = 1
+# hide_when_empty = true
+
+# [block.theme_overrides]
+# idle_bg = "#859900" # green
+# idle_fg = "#002b36" # base03
+
+# [[block]]
+# block = "sound"
+# device_kind = "source"
+# name = "alsa_input.usb-Samson_Technologies_Samson_Q2U_Microphone-00.iec958-stereo"
+
+# [[block]]
+# block = "custom"
+# command = "test -e /proc/asound/Microphone && echo '{\"icon\":\"microphone_full\",\"state\":\"Good\", \"text\": \"\"}' || echo '{\"icon\":\"microphone_muted\",\"state\":\"Critical\", \"text\": \"Disconnected\"}'"
+# interval = 1
+# json = true
+# hide_when_empty = true
+{{ end }}

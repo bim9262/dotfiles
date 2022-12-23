@@ -1,0 +1,282 @@
+set $mod Mod4
+
+{{ if eq .chezmoi.hostname "bmalyn-tower" }}
+output HDMI-A-1 pos 0 0 scale 1.5 adaptive_sync on
+output HDMI-A-2 pos 2560 0 scale 1.5 adaptive_sync on
+output DVI-D-1 pos 5120 512 adaptive_sync on
+{{ else if eq .chezmoi.hostname "bmalyn-yoga" }}
+output HDMI-A-1 pos 0 0 scale 1.5 adaptive_sync on
+output eDP-1 pos 2560 900
+{{ end }}
+output "*" bg /usr/share/backgrounds/mate/desktop/Ubuntu-Mate-Cold-no-logo.png fill
+
+exec xrdb -merge ~/.Xresources
+exec pactl load-module module-switch-on-connect
+exec wl-gammarelay-rs
+exec swaync
+{{ if eq .chezmoi.hostname "bmalyn-tower" }}
+exec openrgb --startminimized
+{{ end }}
+
+# Toggle control center
+bindsym $mod+Shift+n exec swaync-client -t -sw
+
+{{ if eq .chezmoi.hostname "bmalyn-tower" }}
+# input 1386:888:Wacom_Intuos_BT_M_Pad tool_mode '*' absolute
+input type:tablet_tool {
+    tool_mode '*' absolute
+    drag disabled
+    scroll_button BTN_STYLUS
+    scroll_method on_button_down
+    map_to_output HDMI-A-1
+    tap disabled
+    #tap_button_map lmr
+}
+{{ end }}
+
+set $Locker swaylock -f -c 000000
+exec swayidle -w \
+        timeout 30 'if pgrep -x swaylock; then swaymsg "output * dpms off"; fi' \
+        resume 'swaymsg "output * dpms on"' \
+        after-resume 'swaymsg "output * enable"'
+
+set $mode_system System (l) lock, (e) logout, (s) suspend, (h) hibernate, (r) reboot, (Shift+s) shutdown
+mode "$mode_system" {
+    bindsym l exec $Locker, mode "default"
+    bindsym e exec swaymsg exit, mode "default"
+    bindsym s exec $Locker && systemctl suspend, mode "default"
+    bindsym h exec $Locker && systemctl hibernate, mode "default"
+    bindsym r exec systemctl reboot, mode "default"
+    bindsym Shift+s exec systemctl poweroff -i, mode "default"
+
+    # back to normal: Enter or Escape
+    bindsym Return mode "default"
+    bindsym Escape mode "default"
+}
+
+bindsym $mod+l exec $Locker
+bindsym Control+Alt+Delete mode "$mode_system"
+
+bindsym $mod+semicolon exec bemoji -t
+bindsym $mod+colon exec bemoji -c
+
+bindsym Control+Alt+p exec playerctl previous
+bindsym Control+Alt+n exec playerctl next
+bindsym Control+Alt+backslash exec playerctl play-pause
+
+{{ if eq .chezmoi.hostname "bmalyn-tower" }}
+# Sreen brightness controls
+bindsym $mod+Control+Minus      exec busctl --user -- call rs.wl-gammarelay / rs.wl.gammarelay UpdateTemperature n -100
+bindsym $mod+Control+Equal      exec busctl --user -- call rs.wl-gammarelay / rs.wl.gammarelay UpdateTemperature n +100
+bindsym $mod+Control+0          exec busctl --user set-property rs.wl-gammarelay / rs.wl.gammarelay Brightness d 1.0 && busctl --user set-property rs.wl-gammarelay / rs.wl.gammarelay Temperature q 6500
+bindsym $mod+Control+Underscore exec busctl --user -- call rs.wl-gammarelay / rs.wl.gammarelay UpdateBrightness d -0.02
+bindsym $mod+Control+Plus       exec busctl --user -- call rs.wl-gammarelay / rs.wl.gammarelay UpdateBrightness d +0.02
+#bindsym XF86MonBrightnessUp exec busctl --user -- call rs.wl-gammarelay / rs.wl.gammarelay UpdateBrightness d +0.02
+#bindsym XF86MonBrightnessDown exec busctl --user -- call rs.wl-gammarelay / rs.wl.gammarelay UpdateBrightness d -0.02
+{{ end }}
+
+bindsym XF86AudioMute exec pactl set-sink-mute @DEFAULT_SINK@ toggle
+bindsym XF86AudioMicMute exec pactl set-source-mute @DEFAULT_SOURCE@ toggle
+bindsym XF86MonBrightnessDown exec brightnessctl set 5%-
+bindsym XF86MonBrightnessUp exec brightnessctl set +5%
+bindsym XF86AudioPlay exec playerctl play-pause
+bindsym XF86AudioNext exec playerctl next
+bindsym XF86AudioPrev exec playerctl previous
+bindsym XF86Search exec bemenu-run
+bindsym Print exec grim -o $(swaymsg -t get_outputs | jq -r '.[] | select(.focused) | .name') - | wl-copy
+bindsym Alt+Print exec swaymsg -t get_tree | jq -r '.. | select(.pid? and .visible?) | .rect | "\(.x),\(.y) \(.width)x\(.height)"' | slurp | grim -g - - | wl-copy
+bindsym $mod+Print exec grim -o $(swaymsg -t get_outputs | jq -r '.[] | select(.focused) | .name') $(xdg-user-dir PICTURES)/$(date +'%s_grim.png')
+bindsym $mod+Alt+Print exec swaymsg -t get_tree | jq -r '.. | select(.pid? and .visible?) | .rect | "\(.x),\(.y) \(.width)x\(.height)"' | slurp | grim -g - $(xdg-user-dir PICTURES)/$(date +'%s_grim.png')
+
+default_border pixel
+default_floating_border pixel
+bindsym $mod+x [urgent=latest] focus
+
+for_window [class=Civ5XP] fullscreen enable
+for_window [app_id="^chrome-.*"] shortcuts_inhibitor disable
+
+# Font for window titles. Will also be used by the bar unless a different font
+# is used in the bar {} block below.
+# This font is widely installed, provides lots of unicode glyphs, right-to-left
+# text rendering and scalability on retina/hidpi displays (thanks to pango).
+set $font_size 9
+set $bar_height 16
+# set $font_size 16
+# set $bar_height 32
+# font pango:DejaVu Sans Mono for Powerline, Font Awesome 5 Free $font_size
+font pango:Roboto Mono for Powerline, Font Awesome 6 Free $font_size
+
+# Use Mouse+$mod to drag floating windows to their wanted position
+floating_modifier $mod
+
+# start a terminal
+bindsym $mod+Return exec alacritty
+
+# kill focused window
+bindsym $mod+Shift+c kill
+
+# start bemenu (a program launcher)
+bindsym $mod+r exec bemenu-run
+
+# change focus
+bindsym $mod+Left focus left
+bindsym $mod+Down focus down
+bindsym $mod+Up focus up
+bindsym $mod+Right focus right
+
+# move focused window
+bindsym $mod+Shift+j move left
+bindsym $mod+Shift+k move down
+bindsym $mod+Shift+l move up
+bindsym $mod+Shift+colon move right
+
+# alternatively, you can use the cursor keys:
+bindsym $mod+Shift+Left move left
+bindsym $mod+Shift+Down move down
+bindsym $mod+Shift+Up move up
+bindsym $mod+Shift+Right move right
+
+# split in horizontal orientation
+bindsym $mod+h split h
+
+# split in vertical orientation
+bindsym $mod+v split v
+
+# enter fullscreen mode for the focused container
+bindsym $mod+f fullscreen
+
+# change container layout (stacked, tabbed, toggle split)
+bindsym $mod+s layout stacking
+bindsym $mod+w layout tabbed
+bindsym $mod+e layout toggle split
+
+# toggle tiling / floating
+bindsym $mod+Shift+space floating toggle
+
+# change focus between tiling / floating windows
+bindsym $mod+space focus mode_toggle
+
+# focus the parent container
+bindsym $mod+a focus parent
+
+# focus the child container
+bindsym $mod+d focus child
+
+# workspaces
+{{ if eq .chezmoi.hostname "bmalyn-tower" }}
+set $wsF1   1:F1
+set $wsF2   2:F2
+set $wsF3   3:F3
+set $wsF4   4:F4
+set $wsF5   5:F5
+set $wsF6   6:F6
+set $wsF7   7:F7
+set $wsF8   8:F8
+set $wsF9   9:F9
+set $wsF10 10:F10
+set $wsF11 11:F11
+set $wsF12 12:F12
+
+# assign workspaces to outputs
+workspace $wsF1  output HDMI-A-1
+workspace $wsF2  output HDMI-A-1
+workspace $wsF3  output HDMI-A-1
+workspace $wsF4  output HDMI-A-1
+workspace $wsF5  output HDMI-A-2
+workspace $wsF6  output HDMI-A-2
+workspace $wsF7  output HDMI-A-2
+workspace $wsF8  output HDMI-A-2
+workspace $wsF9  output DVI-D-1
+workspace $wsF10 output DVI-D-1
+workspace $wsF11 output DVI-D-1
+workspace $wsF12 output DVI-D-1
+
+# switch to workspace
+bindsym $mod+F1  workspace $wsF1
+bindsym $mod+F2  workspace $wsF2
+bindsym $mod+F3  workspace $wsF3
+bindsym $mod+F4  workspace $wsF4
+bindsym $mod+F5  workspace $wsF5
+bindsym $mod+F6  workspace $wsF6
+bindsym $mod+F7  workspace $wsF7
+bindsym $mod+F8  workspace $wsF8
+bindsym $mod+F9  workspace $wsF9
+bindsym $mod+F10 workspace $wsF10
+bindsym $mod+F11 workspace $wsF11
+bindsym $mod+F12 workspace $wsF12
+
+assign [class="VirtualBox Machine" title=".*1"] $wsF12
+assign [class="VirtualBox Machine" title=".*2"] $wsF8
+assign [class="VirtualBox Machine" title=".*3"] $wsF4
+for_window [class="VirtualBox Machine" title=".*1"] fullscreen enable
+for_window [class="VirtualBox Machine" title=".*2"] fullscreen enable
+for_window [class="VirtualBox Machine" title=".*3"] fullscreen enable
+
+# move focused container to workspace
+bindsym $mod+Shift+F1   move container to workspace $wsF1
+bindsym $mod+Shift+F2   move container to workspace $wsF2
+bindsym $mod+Shift+F3   move container to workspace $wsF3
+bindsym $mod+Shift+F4   move container to workspace $wsF4
+bindsym $mod+Shift+F5   move container to workspace $wsF5
+bindsym $mod+Shift+F6   move container to workspace $wsF6
+bindsym $mod+Shift+F7   move container to workspace $wsF7
+bindsym $mod+Shift+F8   move container to workspace $wsF8
+bindsym $mod+Shift+F9   move container to workspace $wsF9
+bindsym $mod+Shift+F10  move container to workspace $wsF10
+bindsym $mod+Shift+F11  move container to workspace $wsF11
+bindsym $mod+Shift+F12  move container to workspace $wsF12
+{{ else if eq .chezmoi.hostname "bmalyn-yoga" }}
+# switch to workspace
+bindsym $mod+1 workspace 1
+bindsym $mod+2 workspace 2
+bindsym $mod+3 workspace 3
+bindsym $mod+4 workspace 4
+bindsym $mod+5 workspace 5
+bindsym $mod+6 workspace 6
+bindsym $mod+7 workspace 7
+bindsym $mod+8 workspace 8
+bindsym $mod+9 workspace 9
+bindsym $mod+0 workspace 10
+
+# move focused container to workspace
+bindsym $mod+Shift+1 move container to workspace 1
+bindsym $mod+Shift+2 move container to workspace 2
+bindsym $mod+Shift+3 move container to workspace 3
+bindsym $mod+Shift+4 move container to workspace 4
+bindsym $mod+Shift+5 move container to workspace 5
+bindsym $mod+Shift+6 move container to workspace 6
+bindsym $mod+Shift+7 move container to workspace 7
+bindsym $mod+Shift+8 move container to workspace 8
+bindsym $mod+Shift+9 move container to workspace 9
+bindsym $mod+Shift+0 move container to workspace 10
+{{ end }}
+
+# Reload the configuration file
+bindsym $mod+Shift+r reload
+# Exit sway (logs you out of your Wayland session)
+bindsym $mod+Shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -b 'Yes, exit sway' 'swaymsg exit'
+
+bar {
+    position top
+    strip_workspace_numbers yes
+    height $bar_height
+    status_padding 0
+
+    # When the status_command prints a new line to stdout, swaybar updates.
+    status_command i3status-rs
+
+    colors {
+            background #222222
+            statusline #dddddd
+            separator #666666
+
+    #                          border  backgr. text
+            focused_workspace #0088CC #0088CC #ffffff
+            active_workspace #333333 #333333 #ffffff
+            inactive_workspace #333333 #333333 #888888
+            urgent_workspace #2f343a #900000 #ffffff
+    }
+}
+
+
+include /etc/sway/config.d/*

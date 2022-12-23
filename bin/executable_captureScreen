@@ -1,0 +1,5 @@
+#!/usr/bin/bash
+
+#ffmpeg -f x11grab -framerate 15 -video_size 1920x1080 -i :0.0 -pix_fmt yuv420p -f v4l2 /dev/video0
+ffmpeg -f x11grab -framerate 60 -video_size 1920x1080 -i :0.0 -f alsa -ac 2 -pix_fmt yuv420p -f v4l2 /dev/video0
+#wf-recorder --muxer=v4l2 --codec=rawvideo --file=/dev/video0 --force-yuv

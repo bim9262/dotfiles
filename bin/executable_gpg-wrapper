@@ -1,0 +1,7 @@
+#!/bin/bash
+
+echo "$@" >> /tmp/gpg.log
+
+cat $4 >> /tmp/gpg.log
+
+gpg $@ | tee -a /tmp/gpg.log
