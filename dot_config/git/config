@@ -33,9 +33,6 @@
 [commit]
 	gpgsign = true
 
-[log]
-	showSignature = true
-
 [init]
 	defaultBranch = master
 [remote]

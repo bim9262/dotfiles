@@ -81,7 +81,7 @@ button = "left"
 action = "show"
 [[block.click]]
 button = "right"
-action = "toggle"
+action = "toggle_paused"
 
 [[block]]
 block = "hueshift"
@@ -102,7 +102,7 @@ cmd = "nextSink.awk"
 warning_bg = "#002b36" # base03
 warning_fg = "#93a1a1" # base1
 [block.mappings]
-"alsa_output.pci-0000_41_00.1.hdmi-stereo-extra2" = "\uf390"
+"alsa_output.pci-0000_41_00.1.hdmi-stereo-extra1" = "\uf390"
 "alsa_output.usb-Focusrite_Scarlett_Solo_USB_Y7RRZHQ19D3BE3-00.iec958-stereo" = "\uf025"
 {{ else if eq .chezmoi.hostname "bmalyn-yoga" }}
 device_kind = "sink"
