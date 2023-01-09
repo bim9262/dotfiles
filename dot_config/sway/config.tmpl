@@ -83,7 +83,7 @@ bindsym XF86AudioPlay exec playerctl play-pause
 bindsym XF86AudioNext exec playerctl next
 bindsym XF86AudioPrev exec playerctl previous
 bindsym XF86Search exec bemenu-run
-set $Print grimshot usage | sed -En '/^Targets:/,/^$/ {/Targets:|^$/!p}' | awk {'print $1'} | tr -d :  | bemenu | xargs -r grimshot --notify
+set $Print grimshot usage | sed -En '/^Targets:/,/^$/ {/Targets:|^$/!p}' | awk {'print $1'} | tr -d :  | bemenu -p "What would you like to PrintScreen?" | xargs -r grimshot --notify
 bindsym Print exec $Print copy 
 bindsym $mod+Print exec $Print save 
 
