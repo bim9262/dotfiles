@@ -39,3 +39,5 @@
 	pushdefault = origin
 [checkout]
 	defaultRemote = upstream
+[alias]
+	graph = log --graph --abbrev-commit --decorate --oneline --exclude='refs/remotes/*/gh-pages'
