@@ -12,6 +12,7 @@ output "*" bg /usr/share/backgrounds/mate/desktop/Ubuntu-Mate-Cold-no-logo.png f
 
 exec xrdb -merge ~/.Xresources
 exec pactl load-module module-switch-on-connect
+exec playerctld daemon
 exec wl-gammarelay-rs
 exec swaync
 {{ if eq .chezmoi.hostname "bmalyn-tower" }}
