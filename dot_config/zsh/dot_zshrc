@@ -80,16 +80,3 @@ function cargo_build_time_run_bin(){
 	shift
 	cargo test --bin $bin && cargo build --release --bin $bin && time target/release/$bin $@
 }
-
-if [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ]; then
-  SESSION_TYPE=remote/ssh
-# many other tests omitted
-else
-  case $(ps -o comm= -p $PPID) in
-    sshd|*/sshd) SESSION_TYPE=remote/ssh;;
-  esac
-fi
-
-if [[ -z "$TMUX" ]] && [[ "$SESSION_TYPE" != "remote/ssh" ]]; then
-	exec tmux
-fi

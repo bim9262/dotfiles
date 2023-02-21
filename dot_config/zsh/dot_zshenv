@@ -33,6 +33,8 @@ export PASSWORD_STORE_ENABLE_EXTENSIONS=true
 export MANPAGER="sh -c 'col -bx | bat -l man -p'"
 #export VISUAL=less
 
+export PATH=/home/bmalyn/.local/share/npm/bin:$PATH
+
 # You may need to manually set your language environment
 # export LANG=en_US.UTF-8
 
