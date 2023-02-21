@@ -4,6 +4,8 @@ theme = "solarized-dark"
 [theme.overrides]
 separator = "<span size='12pt'></span>"
 good_bg = "#0dbc79"
+alternating_tint_bg = "#181818"
+alternating_tint_fg = "#181818"
 
 [icons]
 icons = "material-nf"
@@ -92,11 +94,8 @@ block = "notify"
 format = " $icon {($notification_count.eng(w:1)) |}"
 driver = "swaync"
 [[block.click]]
-button = "left"
-action = "show"
-[[block.click]]
 button = "right"
-action = "toggle_paused"
+action = "show"
 
 [[block]]
 block = "hueshift"
