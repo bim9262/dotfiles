@@ -15,6 +15,7 @@ exec pactl load-module module-switch-on-connect
 exec playerctld daemon
 exec wl-gammarelay-rs
 exec swaync
+exec gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita-dark'
 {{ if eq .chezmoi.hostname "bmalyn-tower" }}
 exec openrgb --startminimized
 {{ end }}
@@ -34,6 +35,12 @@ input type:tablet_tool {
     #tap_button_map lmr
 }
 {{ end }}
+
+input type:keyboard {
+    xkb_layout us,se
+    xkb_variant ,nodeadkeys
+    xkb_options grp:shifts_toggle
+}
 
 set $Locker swaylock -f -c 000000
 exec swayidle -w \
