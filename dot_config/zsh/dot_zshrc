@@ -80,3 +80,20 @@ function cargo_build_time_run_bin(){
 	shift
 	cargo test --bin $bin && cargo build --release --bin $bin && time target/release/$bin $@
 }
+
+declare -A months=( [Jan]=1 [Feb]=2 [Mar]=3 [Apr]=4 [May]=5 [Jun]=6 [Jul]=7 [Aug]=8 [Sep]=9 [Oct]=10 [Nov]=11 [Dec]=12 )
+
+date_regex='^(.*)(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) ([[:digit:]]+), ([[:digit:]]{4})(.*)'
+
+rename_date() {
+  local prefix suffix isodate
+  if [[ $1 =~ $date_regex ]]; then
+    prefix=${match[1]}
+    isodate=$(printf '%04d-%02d-%02dT0000Z' "${match[4]}" "${months[${match[2]}]}" "${match[3]}")
+    suffix=${match[5]}
+    printf 'in:  %s\nout: %s\n' "$1" "${prefix}${isodate}${suffix}" >&2
+    mv -- "$1" "${prefix}${isodate}${suffix}" # uncomment at will
+  else
+    printf 'Error: %q did not match regex\n' "$1" >&2
+  fi
+}

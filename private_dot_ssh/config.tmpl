@@ -1,0 +1,11 @@
+{{- if eq .chezmoi.hostname "bmalyn-tower" }}
+Host freebsd
+  HostName localhost
+  Port 3022
+  RequestTTY force
+  RemoteCommand /compat/linux/usr/bin/bash
+{{- end }}
+
+Host aur.archlinux.org
+  IdentityFile ~/.ssh/aur
+  User aur

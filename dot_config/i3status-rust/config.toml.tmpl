@@ -2,6 +2,7 @@
 theme = "solarized-dark"
 
 [theme.overrides]
+end_separator = "<span size='12pt' color='#93a1a1'>|</span>"
 separator = "<span size='12pt'></span>"
 good_bg = "#0dbc79"
 alternating_tint_bg = "#181818"
@@ -10,10 +11,15 @@ alternating_tint_fg = "#181818"
 [icons]
 icons = "material-nf"
 
+[geolocator]
+geolocator = "ip2location"
+
 [[block]]
 block = "music"
-format = " $icon {{"{{"}}\\| $volume_icon $volume \\| |}$combo.str(max_w:25, rot_interval:0.1) \\| $prev $play $next |}"
-seek_step_secs = 10
+format = " $icon {{"{{"}}$volume_icon $volume \\| |}$combo.str(max_w:25, rot_interval:0.1) \\| $prev $play $next |{ Player $cur of $avail \\| $prev $play $next| No players open} }"
+seek_forward_step_secs = 15
+seek_backward_step_secs = 10
+interface_name_exclude = ["playerctld", "chromium.*"]
 [[block.click]]
 button = "left"
 action = "play_pause"
@@ -25,14 +31,52 @@ button = "down"
 action = "volume_down"
 [[block.click]]
 button = "forward"
-action = "seek_forward"
+action = "next"
 [[block.click]]
 button = "back"
+action = "prev"
+[[block.click]]
+button = "wheel_left"
 action = "seek_backward"
+[[block.click]]
+button = "wheel_right"
+action = "seek_forward"
 [block.theme_overrides]
 info_bg = { link = "good_bg" }
 
-{{ if eq .chezmoi.hostname "bmalyn-yoga" }}
+[[block]]
+block = "calendar"
+next_event_format = " $icon $start.datetime(f:'%a %H:%M') $summary.str(max_w:25, rot_interval:0.1) {$source|} "
+ongoing_event_format = " $icon $summary.str(max_w:25, rot_interval:0.1) (ends at $end.datetime(f:'%H:%M')) {$source|} "
+no_events_format = " $icon no events "
+fetch_interval = 30
+warning_threshold = 600
+events_within_hours = 96
+[[block.source]]
+url = "https://apidata.googleusercontent.com/caldav/v2"
+[block.source.auth]
+type = "oauth2"
+client_id = "249479960943-2a31c7plkpc8be8jflvluqhahhdo51q7.apps.googleusercontent.com"
+client_secret = "{{ pass "i3status-rust/google-client-secret" }}"
+auth_url = "https://accounts.google.com/o/oauth2/auth"
+token_url = "https://oauth2.googleapis.com/token"
+redirect_port = 8080
+scopes = [
+    "https://www.googleapis.com/auth/calendar",
+    "https://www.googleapis.com/auth/calendar.events.readonly",
+]
+
+[[block]]
+block = "weather"
+format = " $icon $weather_verbose {$temp}C {$sunrise.datetime(f:'%H:%M')|err}/{$sunset.datetime(f:'%H:%M')|err} "
+format_alt = " $icon_ffin Forecast (8 hours) {$weather_verbose_ffin {$temp_favg}C ({$temp_fmax}C/{$temp_fmin}C)|Unavailable} "
+autolocate = true
+autolocate_interval = "once"
+[block.service]
+name = "metno"
+forecast_hours = 8
+
+{{- if eq .chezmoi.hostname "bmalyn-yoga" }}
 [[block]]
 block = "net"
 device = "wlp2s0"
@@ -40,54 +84,38 @@ format = " $icon {$signal_strength} "
 [[block.click]]
 button = "left"
 cmd = "alacritty -e nmtui"
-{{ end }}
+{{- end }}
 
 [[block]]
 block = "temperature"
 interval = 1
-format = " $icon Temp: {$max}C "
+format = " $icon {$max}C "
 
 [[block]]
 block = "load"
 interval = 1
-format = " $icon Load: $1m "
 
 [[block]]
 block = "cpu"
+# format = " $icon $utilization.bar_graph(w:32) $barchart $utilization "
 interval = 1
-format = " $icon Usage: $utilization "
+
+# Start of notification blocks
+
 
 [[block]]
 block = "battery"
 interval = 1
-{{ if eq .chezmoi.hostname "bmalyn-tower" }}
+{{- if eq .chezmoi.hostname "bmalyn-tower" }}
 driver = "apc_ups"
-format = " $icon $percentage $time {$power|N/A} "
-full_format = " $icon Full $time {$power|N/A} "
-{{ else if eq .chezmoi.hostname "bmalyn-yoga" }}
+format = " $icon $percentage $time_remaining.duration(hms, min_unit:m) {$power|N/A} "
+full_format = " $icon Full $time_remaining.duration(hms, min_unit:m) {$power|N/A} "
+{{- else if eq .chezmoi.hostname "bmalyn-yoga" }}
 device = "BAT1"
-format = " $icon {$percentage} {$time} "
+format = " $icon {$percentage} {$time_remaining.duration(hms, min_unit:m)} "
 full_format = " $icon Full "
-{{ end }}
+{{- end }}
 
-[[block]]
-block = "pacman"
-format = " $icon $pacman + $aur = both updates available "
-format_singular = " $icon $pacman + $aur = both updates available "
-format_up_to_date = " $icon system up to date "
-critical_updates_regex = "(linux|linux-lts|linux-zen)"
-aur_command = "paru -Qua"
-
-[[block]]
-block = "weather"
-format = " $icon $weather_verbose {$temp}C "
-autolocate = true
-[block.service]
-name = "metno"
-
-[[block]]
-block = "time"
-format = " $icon $timestamp.datetime(f:'%a %Y-%m-%d %R %Z') "
 
 [[block]]
 block = "backlight"
@@ -97,63 +125,73 @@ block = "hueshift"
 click_temp = 4500
 
 [[block]]
-block = "notify"
-format = " $icon {($notification_count.eng(w:1)) |}"
-driver = "swaync"
-[[block.click]]
-button = "right"
-action = "show"
-
-[[block]]
 block = "sound"
-{{ if eq .chezmoi.hostname "bmalyn-tower" }}
-step_width = 0
-format = " $icon $output_name "
+driver = "pipewire"
+format = " $icon $output_name {$volume.eng(w:3)|} "
 [[block.click]]
 button = "left"
-action = "toggle_mute"
-[[block.click]]
-button = "right"
-cmd = "nextSink.awk"
+cmd = "nextSink.py"
 [block.theme_overrides]
 warning_bg = { link = "idle_bg" }
 warning_fg = { link = "idle_fg" }
 [block.mappings]
 "alsa_output\\..*\\.hdmi-stereo.*" = "\uf390"
 "alsa_output\\.usb-Focusrite_Scarlett_Solo_USB_Y7RRZHQ19D3BE3-00\\..*" = "\U000f02cb"
-{{ else if eq .chezmoi.hostname "bmalyn-yoga" }}
-device_kind = "sink"
-name = "alsa_output.pci-0000_00_1f.3.pro-output-0"
 
-# [[block]]
-# block = "custom"
-# # Print the headphone symbol if Slim is plugged in
-# command = "test -e /proc/asound/Slim && echo -e '\\uf025'"
-# interval = 1
-# hide_when_empty = true
-
-# [block.theme_overrides]
-# idle_bg = "#859900" # green
-# idle_fg = "#002b36" # base03
-
-# [[block]]
-# block = "sound"
-# device_kind = "source"
-# name = "alsa_input.usb-Samson_Technologies_Samson_Q2U_Microphone-00.iec958-stereo"
-
-# [[block]]
-# block = "custom"
-# command = "test -e /proc/asound/Microphone && echo '{\"icon\":\"microphone_full\",\"state\":\"Good\", \"text\": \"\"}' || echo '{\"icon\":\"microphone_muted\",\"state\":\"Critical\", \"text\": \"Disconnected\"}'"
-# interval = 1
-# json = true
-# hide_when_empty = true
-{{ end }}
+[[block]]
+block = "privacy"
+[[block.driver]]
+name = "v4l"
+[[block.driver]]
+name = "pipewire"
+exclude_input = ["openrgb", "PulseAudio Volume Control"]
+display = "nickname"
 
 [[block]]
 block = "keyboard_layout"
 driver = "sway"
-format = " $layout " # $variant
+format = " $layout "      # $variant
 [block.mappings]
 "English (US)" = "en"
 "Swedish (no dead keys)" = "sv"
 
+[[block]]
+block = "packages"
+package_manager = ["pacman", "aur", "flatpak"]
+format_up_to_date = ""
+critical_updates_regex = "(linux|linux-lts|linux-zen)"
+aur_command = "paru -Qua"
+interval = 3600
+error_interval = 3600
+[[block.click]]
+button = "left"
+cmd = "{ echo paru; fakeroot paru -Qu --dbpath /tmp/checkup-db-i3statusrs-$USER/ | grep -v '\\[ignored\\]$'; echo =======================; echo flatpak; flatpak remote-ls --updates --columns=ref,version; } | bemenu -l 20"
+[[block.click]]
+# Updates the block on right click
+button = "right"
+update = true
+
+
+[[block]]
+block = "notify"
+format = " $icon {$notification_count.eng(w:1) |}"
+driver = "swaync"
+[[block.click]]
+button = "left"
+action = "show"
+[[block.click]]
+button = "right"
+action = "toggle_paused"
+
+[[block]]
+block = "time"
+format = [
+    " $icon $timestamp.datetime(f:'%a %Y-%m-%d %R %z') ",
+    " $icon $timestamp.datetime(f:full, l:en-u-ca-hebrew-hc-h23, p:m) $timestamp.datetime(f:'%z') ",
+]
+[[block.click]]
+button = "left"
+action = "next_format"
+[[block.click]]
+button = "right"
+action = "prev_format"
