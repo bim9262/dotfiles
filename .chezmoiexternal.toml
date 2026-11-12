@@ -2,7 +2,3 @@
     type = "git-repo"
     url = "https://github.com/ohmyzsh/ohmyzsh.git"
     refreshPeriod = "168h"
-[".config/swaync/style.css"]
-    type = "file"
-    url = "https://raw.githubusercontent.com/ErikReider/Linux/master/dotfiles/swayConfig/swaync/style.css"
-    refreshPeriod = "168h"
