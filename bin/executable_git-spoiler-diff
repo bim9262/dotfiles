@@ -1,0 +1,12 @@
+#!/bin/bash
+
+cat  << EOF
+<details>
+    <summary>Spoiler warning</summary>
+
+\`\`\`diff
+$(git diff $@)
+\`\`\`
+</details>
+
+EOF

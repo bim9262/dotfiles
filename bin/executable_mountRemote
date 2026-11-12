@@ -1,0 +1,8 @@
+#!/bin/bash
+
+#Home mount
+#sshfs -o reconnect,ServerAliveInterval=15,ServerAliveCountMax=3 home.bmalyn.com:/run/media/bmalyn/WD\ Drive/Videos ~/Videos/
+sshfs -o reconnect,ServerAliveInterval=15,ServerAliveCountMax=3 bmalyn-nas:/video ~/Videos
+
+#Google mount
+sshfs -o reconnect,ServerAliveInterval=15,ServerAliveCountMax=3 bmalyn.com:/srv/http/ ~/http/
